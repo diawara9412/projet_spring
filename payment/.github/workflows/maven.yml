@@ -1,0 +1,39 @@
+name: Maven CI for Payment Module
+
+on:
+  push:
+    paths:
+      - 'payment/**'
+  pull_request:
+    paths:
+      - 'payment/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Vérifie le code source
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configure Java
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          java-version: '21' # Utilisez la version de Java que vous avez configurée dans votre projet
+          distribution: 'temurin'
+
+      # Met en cache le dossier Maven pour accélérer les builds
+      - name: Cache Maven dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Exécute les tests Maven uniquement dans le module payment
+      - name: Build and Test Payment Module
+        working-directory: ./payment
+        run: mvn clean install
